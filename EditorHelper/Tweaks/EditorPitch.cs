@@ -143,10 +143,27 @@ namespace EditorHelper.Tweaks
 				control.SetActive(Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.LeftShift));
 				if (!Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftShift)) return;
 				Color color = Input.GetKey(KeyCode.LeftShift) ? Color.red : Color.blue;
+				var value = Input.GetKey(KeyCode.LeftShift) ? fastSpeed : slowSpeed;
+
+				var mouseScrollDelta = Input.mouseScrollDelta;
+				if (Mathf.Abs(Mathf.Abs(mouseScrollDelta.y)) > 0.05f)
+				{
+					if (mouseScrollDelta.y > 0f)
+					{
+						value.Value += Input.GetKey(KeyCode.LeftAlt) ? 0.01f : 0.1f;
+					}
+					else if (mouseScrollDelta.y < 0f)
+					{
+						value.Value -= Input.GetKey(KeyCode.LeftAlt) ? 0.01f : 0.1f;
+					}
+					if(Input.GetKey(KeyCode.LeftShift))
+						value.Value = Mathf.Clamp(value.Value, 1f, 5f);
+					else
+						value.Value = Mathf.Clamp(value.Value, 0.01f, 1f);
+					value.Value = Mathf.Round(value.Value * 100f) / 100f;
+				}
 				speedText.color = color;
-				speedText.text = "x" + (Input.GetKey(KeyCode.LeftShift)
-					? fastSpeed.Value.ToString("0.0#")
-					: slowSpeed.Value.ToString("0.0#"));
+				speedText.text = "x" + value.Value.ToString("0.0#");
 			}
 
 			[HarmonyPatch(typeof(scnEditor), "LevelSpeed", MethodType.Getter)]
