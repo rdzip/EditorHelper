@@ -15,6 +15,8 @@ namespace EditorHelper.Tweaks
 		private static ConfigEntry<float> slowSpeed;
 		private static ConfigEntry<float> fastSpeed;
 
+		private static GameObject root;
+		private static HoverCheck hover;
 		private static GameObject control;
 		private static Image leftImage;
 		private static Image rightImage;
@@ -31,7 +33,7 @@ namespace EditorHelper.Tweaks
 		public void StopTweak()
 		{
 			harmony.UnpatchSelf();
-			if (control != null) GameObject.DestroyImmediate(control);
+			if (root != null) GameObject.DestroyImmediate(root);
 		}
 
 		public static class PitchPatch
@@ -42,12 +44,19 @@ namespace EditorHelper.Tweaks
 			{
 				Vector3 pos = __instance.metronome.rectTransform.localPosition + new Vector3(-70f, -1f);
 
-				if (control != null) GameObject.DestroyImmediate(control);
+				if (root != null) GameObject.DestroyImmediate(root);
+
+				root = new GameObject("Speed");
+				root.transform.SetParent(__instance.metronome.transform.parent.parent, false);
+				root.transform.localPosition = pos;
+				var rect = root.AddComponent<RectTransform>();
+				rect.pivot = new Vector2(0.5f, 0.5f);
+				rect.sizeDelta = new Vector2(50f, 10f);
+				hover = root.AddComponent<HoverCheck>();
 
 				control = new GameObject("Speed");
-				control.transform.SetParent(__instance.metronome.transform.parent.parent, false);
-				control.transform.localPosition = pos;
-				var rect = control.AddComponent<RectTransform>();
+				control.transform.SetParent(root.transform, false);
+				rect = control.AddComponent<RectTransform>();
 				rect.pivot = new Vector2(0.5f, 0.5f);
 				rect.sizeDelta = new Vector2(50f, 10f);
 
@@ -145,23 +154,27 @@ namespace EditorHelper.Tweaks
 				Color color = Input.GetKey(KeyCode.LeftShift) ? Color.red : Color.blue;
 				var value = Input.GetKey(KeyCode.LeftShift) ? fastSpeed : slowSpeed;
 
-				var mouseScrollDelta = Input.mouseScrollDelta;
-				if (Mathf.Abs(Mathf.Abs(mouseScrollDelta.y)) > 0.05f)
+				if (hover.isHover)
 				{
-					if (mouseScrollDelta.y > 0f)
+					var mouseScrollDelta = Input.mouseScrollDelta;
+					if (Mathf.Abs(Mathf.Abs(mouseScrollDelta.y)) > 0.05f)
 					{
-						value.Value += Input.GetKey(KeyCode.LeftAlt) ? 0.01f : 0.1f;
+						if (mouseScrollDelta.y > 0f)
+						{
+							value.Value += Input.GetKey(KeyCode.LeftAlt) ? 0.01f : 0.1f;
+						}
+						else if (mouseScrollDelta.y < 0f)
+						{
+							value.Value -= Input.GetKey(KeyCode.LeftAlt) ? 0.01f : 0.1f;
+						}
+						if (Input.GetKey(KeyCode.LeftShift))
+							value.Value = Mathf.Clamp(value.Value, 1f, 5f);
+						else
+							value.Value = Mathf.Clamp(value.Value, 0.01f, 1f);
+						value.Value = Mathf.Round(value.Value * 100f) / 100f;
 					}
-					else if (mouseScrollDelta.y < 0f)
-					{
-						value.Value -= Input.GetKey(KeyCode.LeftAlt) ? 0.01f : 0.1f;
-					}
-					if(Input.GetKey(KeyCode.LeftShift))
-						value.Value = Mathf.Clamp(value.Value, 1f, 5f);
-					else
-						value.Value = Mathf.Clamp(value.Value, 0.01f, 1f);
-					value.Value = Mathf.Round(value.Value * 100f) / 100f;
 				}
+
 				speedText.color = color;
 				speedText.text = "x" + value.Value.ToString("0.0#");
 			}
@@ -174,6 +187,21 @@ namespace EditorHelper.Tweaks
 					__result = fastSpeed.Value;
 				if (Input.GetKey(KeyCode.LeftControl))
 					__result = slowSpeed.Value;
+			}
+		}
+
+		public class HoverCheck : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+		{
+			public bool isHover = false;
+
+			public void OnPointerEnter(PointerEventData eventData)
+			{
+				isHover = true;
+			}
+
+			public void OnPointerExit(PointerEventData eventData)
+			{
+				isHover = false;
 			}
 		}
 	}
