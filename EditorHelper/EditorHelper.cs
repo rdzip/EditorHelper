@@ -10,14 +10,25 @@ namespace EditorHelper
 	public class EditorHelper : BaseUnityPlugin
 	{
 		public const string pluginPath = "BepInEx/plugins/EditorHelper/";
+		public static EditorHelper Instance { get; private set; }
+
+		internal ManualLogSource EH_Logger { get { return Logger; } }
 
 		private void Awake()
 		{
+			Instance = this;
 			foreach (var type in typeof(EditorHelper).Assembly.GetTypes()
 				.Where(type => type.IsClass && type.Namespace.Contains("EditorHelper.Tweaks") && type.GetInterface("IEditorTweak") != null))
 			{
-				IEditorTweak tweak = Activator.CreateInstance(type) as IEditorTweak;
-				tweak.StartTweak(Config);
+				try
+				{
+					IEditorTweak tweak = Activator.CreateInstance(type) as IEditorTweak;
+					tweak.StartTweak(Config);
+				}
+				catch (Exception e)
+				{
+					Logger.LogError(e);
+				}
 			}
 		}
 
@@ -26,8 +37,15 @@ namespace EditorHelper
 			foreach (var type in typeof(EditorHelper).Assembly.GetTypes()
 				.Where(type => type.IsClass && type.Namespace.Contains("EditorHelper.Tweaks") && type.GetInterface("IEditorTweak") != null))
 			{
-				IEditorTweak tweak = Activator.CreateInstance(type) as IEditorTweak;
-				tweak.StopTweak();
+				try
+				{
+					IEditorTweak tweak = Activator.CreateInstance(type) as IEditorTweak;
+					tweak.StopTweak();
+				}
+				catch (Exception e)
+				{
+					Logger.LogError(e);
+				}
 			}
 		}
 	}

@@ -2,12 +2,12 @@
 using HarmonyLib;
 using RDLevelEditor;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using UnityEngine;
+using System.Collections;
 
 namespace EditorHelper.Tweaks
 {
@@ -27,11 +27,23 @@ namespace EditorHelper.Tweaks
 
 		public static class KoreanPatch
 		{
-			[HarmonyPatch(typeof(InspectorPanel_Comment), "LateUpdate")]
+			[HarmonyPatch(typeof(scnEditor), "LateUpdate")]
 			[HarmonyPostfix]
-			public static void InputOtherLanguage(InspectorPanel_Comment __instance)
+			public static void InputOtherLanguage(scnEditor __instance)
 			{
-				RDEditorUtils.UpdateUIText(__instance.dialogue.textComponent, __instance.dialogue.textComponent.text, false);
+				if (__instance.inspectorPanelManager.GetCurrent() is InspectorPanel_Comment)
+				{
+					var panel = __instance.inspectorPanelManager.GetCurrent() as InspectorPanel_Comment;
+					foreach (Property property in panel.properties)
+					{
+						if (property.name == "text")
+						{
+							PropertyControl_InputField inputField = (PropertyControl_InputField)property.control;
+							if (inputField.inputField.isFocused)
+								RDEditorUtils.UpdateUIText(inputField.inputField.textComponent, inputField.inputField.textComponent.text, false);
+						}
+					}
+				}
 			}
 		}
 	}

@@ -27,22 +27,22 @@ namespace EditorHelper.Tweaks.TrueCameraHelper
 			[HarmonyPostfix]
 			public static void AddInspector(scnEditor __instance)
 			{
-				var origInspector = __instance.inspectorPanelManager.Get<InspectorPanel_MoveCamera>();
-				var inspector = GameObject.Instantiate(origInspector, origInspector.transform.parent);
-				var camera = inspector.gameObject.AddComponent<InspectorPanel_TrueCamera>();
-				camera.cameraPosition = inspector.cameraPosition;
-				camera.zoom = inspector.zoom;
-				camera.angle = inspector.angle;
-				camera.duration = inspector.duration;
-				camera.ease = inspector.ease;
-				camera.real = inspector.real;
-				camera.cameraPositionLabel = inspector.cameraPositionLabel;
-				camera.zoomLabel = inspector.zoomLabel;
-				camera.angleLabel = inspector.angleLabel;
-				inspector.DisableComponent<InspectorPanel_MoveCamera>();
-				((Dictionary<Type, InspectorPanel>)__instance.inspectorPanelManager
-					.Field("inspectorPanels").GetValue(__instance.inspectorPanelManager))
-					.Add(typeof(InspectorPanel_TrueCamera), camera);
+				//var origInspector = __instance.inspectorPanelManager.Get<InspectorPanel_MoveCamera>();
+				//var inspector = GameObject.Instantiate(origInspector, origInspector.transform.parent);
+				//var camera = inspector.gameObject.AddComponent<InspectorPanel_TrueCamera>();
+				//camera.cameraPosition = inspector.cameraPosition;
+				//camera.zoom = inspector.zoom;
+				//camera.angle = inspector.angle;
+				//camera.duration = inspector.duration;
+				//camera.ease = inspector.ease;
+				//camera.real = inspector.real;
+				//camera.cameraPositionLabel = inspector.cameraPositionLabel;
+				//camera.zoomLabel = inspector.zoomLabel;
+				//camera.angleLabel = inspector.angleLabel;
+				//inspector.DisableComponent<InspectorPanel_MoveCamera>();
+				//((Dictionary<Type, InspectorPanel>)__instance.inspectorPanelManager
+				//	.Field("inspectorPanels").GetValue(__instance.inspectorPanelManager))
+				//	.Add(typeof(InspectorPanel_TrueCamera), camera);
 			}
 
 			[HarmonyPatch(typeof(SelectLevelEventPanel), "Awake")]
